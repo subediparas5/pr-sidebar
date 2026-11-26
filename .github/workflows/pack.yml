@@ -1,0 +1,51 @@
+name: Pack extension
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write # create releases
+
+concurrency:
+  group: pack-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pack:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Check and zip
+        id: pack
+        run: ./scripts/pack.sh | tee -a "$GITHUB_OUTPUT"
+
+      - name: Upload zip
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr-sidebar-v${{ steps.pack.outputs.version }}
+          path: ${{ steps.pack.outputs.zip }}
+          if-no-files-found: error
+
+      # A new manifest version gets a GitHub Release with the zip attached.
+      # Pushes that don't change the version only produce the artifact above.
+      - name: Release new version
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.pack.outputs.version }}
+          ZIP: ${{ steps.pack.outputs.zip }}
+        run: |
+          if gh release view "v$VERSION" >/dev/null 2>&1; then
+            echo "Release v$VERSION already exists; bump \"version\" in manifest.json to publish a new one."
+          else
+            gh release create "v$VERSION" "$ZIP" \
+              --title "PR Sidebar v$VERSION" \
+              --target "$GITHUB_SHA" \
+              --generate-notes
+          fi

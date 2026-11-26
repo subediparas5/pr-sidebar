@@ -28,6 +28,14 @@ After changing `manifest.json`, click the reload icon on the extension's card. C
 
 If your org restricts third-party apps, its PRs are hidden until an owner approves PR Sidebar. The sidebar shows a banner with a link to request access. A personal access token works without that approval.
 
+## Builds and releases
+
+Every push to `main` runs [Pack extension](.github/workflows/pack.yml). It syntax-checks the scripts, verifies that every file the manifest and pages reference exists, and zips only what Chrome needs into `pr-sidebar-v<version>.zip` (attached to the run).
+
+To publish a release, bump `version` in `manifest.json` and push. The workflow creates a GitHub Release `v<version>` with the zip attached; that zip is also what you upload to the Chrome Web Store. Pushes that don't change the version only produce the run artifact.
+
+Build the same zip locally with `./scripts/pack.sh` (output in `dist/`).
+
 ## Project layout
 
 | Path | What it is |
@@ -40,6 +48,7 @@ If your org restricts third-party apps, its PRs are hidden until an owner approv
 | `icons/` | Toolbar icons; `icon.svg` (48px and up) and `icon-small.svg` (16 and 32px) are the sources |
 | `design/` | Store tile, one-colour marks, GitHub app logo |
 | `STORE_LISTING.md` | Chrome Web Store copy and permission justifications |
+| `scripts/pack.sh`, `.github/workflows/pack.yml` | Packaging and releases |
 
 ## Privacy
 
