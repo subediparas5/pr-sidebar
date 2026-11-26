@@ -1,0 +1,7 @@
+.DS_Store
+.claude/
+
+# Scratch design files (concept sheets, size tests)
+design/icon-concepts.png
+design/icon-test-sheet.png
+design/a-rail.svg
