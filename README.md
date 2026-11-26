@@ -2,7 +2,15 @@
 
 Your GitHub pull requests as Arc-style live folders, in Chrome's side panel.
 
-![PR Sidebar](design/store/promo-tile-440x280.png)
+<img src="docs/screenshots/sidebar.png" width="744" alt="PR Sidebar in light and dark themes. The Needs your attention folder lists pull requests from Playwright, Kubernetes, Node.js, Next.js, React and Deno, labeled Review requested, Changes requested, Checks failing, Ready to merge and Assigned to you. A 12-day-old Kubernetes review request is still at the top with an unread dot.">
+
+<sub>Sample data: the repositories are real projects, the pull requests and authors are made up.</sub>
+
+## Why
+
+I work on around 20 pull requests a day, spread across many different repositories. GitHub shows them one repository or one notification at a time, so things slip through. A review request from two weeks ago sinks under newer activity. A PR fails its checks overnight and nobody notices. An approved PR sits unmerged for days.
+
+PR Sidebar puts all of it in one list that stays open next to whatever you're working on. Anything waiting on you goes to the top of **Needs your attention**, however old it is, so a request you missed last week is just as visible as one from five minutes ago. Everything else is one click away, and opens in its own tab group instead of scattering across your tabs.
 
 ## What it does
 
@@ -16,10 +24,16 @@ Your GitHub pull requests as Arc-style live folders, in Chrome's side panel.
 
 Keyboard: `Alt+Shift+P` opens the sidebar, `/` searches, `↑`/`↓` move, `Enter` opens, `p` pins, `u` toggles read, `R` refreshes.
 
+### Settings
+
+Choose your folders, add custom ones from any GitHub search, and set the refresh interval, tab group colour and notifications.
+
+<img src="docs/screenshots/settings.png" width="660" alt="The PR Sidebar settings page: signed-in account, toggles for each folder including Needs your attention, and custom folders.">
+
 ## Install (unpacked)
 
-1. Open `chrome://extensions` and turn on **Developer mode**.
-2. Click **Load unpacked** and choose this folder.
+1. Download `pr-sidebar-v<version>.zip` from the latest [release](../../releases/latest) and unzip it, or clone this repo.
+2. Open `chrome://extensions`, turn on **Developer mode**, click **Load unpacked** and choose the unzipped folder.
 3. Pin PR Sidebar, click its icon, and click **Sign in with GitHub**. Or paste a personal access token in Settings (classic token with the `repo` and `read:org` scopes).
 
 After changing `manifest.json`, click the reload icon on the extension's card. Changes to the sidebar's HTML, CSS or JS show up the next time you open the panel.
@@ -47,6 +61,7 @@ Build the same zip locally with `./scripts/pack.sh` (output in `dist/`).
 | `options.*` | Settings page |
 | `icons/` | Toolbar icons; `icon.svg` (48px and up) and `icon-small.svg` (16 and 32px) are the sources |
 | `design/` | Store tile, one-colour marks, GitHub app logo |
+| `docs/screenshots/` | README screenshots (sample data) |
 | `STORE_LISTING.md` | Chrome Web Store copy and permission justifications |
 | `scripts/pack.sh`, `.github/workflows/pack.yml` | Packaging and releases |
 
