@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "PR Sidebar",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "Arc-style live folders for your GitHub pull requests in Chrome's side panel. Reviews, CI status and unread dots at a glance.",
   "permissions": [
     "sidePanel",

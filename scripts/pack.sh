@@ -7,7 +7,7 @@ cd "$(dirname "$0")/.."
 
 VERSION=$(node -p "require('./manifest.json').version")
 OUT="dist/pr-sidebar-v${VERSION}.zip"
-FILES=(manifest.json background.js github.js github-session.js github-page.js offscreen.html offscreen.js sidebar-model.js sidepanel.html sidepanel.css sidepanel.js options.html options.js icons/*.png)
+FILES=(manifest.json background.js github.js github-session.js github-page.js offscreen.html offscreen.js sidebar-model.js sidepanel.html sidepanel.css sidepanel.js options.html options.js icons/*.png icons/icon-small.svg)
 
 # Syntax-check the scripts (they're ES modules).
 tmp=$(mktemp -d)
