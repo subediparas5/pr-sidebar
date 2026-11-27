@@ -6,3 +6,5 @@ design/icon-concepts.png
 design/icon-test-sheet.png
 design/a-rail.svg
 dist/
+
+node_modules/

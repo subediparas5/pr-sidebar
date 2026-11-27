@@ -1,70 +1,67 @@
 # PR Sidebar
 
-Your GitHub pull requests as Arc-style live folders, in Chrome's side panel.
+GitHub pull requests in an Arc-style Live Folder, inside Chrome's side panel.
 
-<img src="docs/screenshots/sidebar.png" width="744" alt="PR Sidebar in light and dark themes. The Needs your attention folder lists pull requests from Playwright, Kubernetes, Node.js, Next.js, React and Deno, labeled Review requested, Changes requested, Checks failing, Ready to merge and Assigned to you. A 12-day-old Kubernetes review request is still at the top with an unread dot.">
+## Sign in once, on GitHub
 
-<sub>Sample data: the repositories are real projects, the pull requests and authors are made up.</sub>
+PR Sidebar uses the **existing GitHub session in the same Chrome profile**. No OAuth app, app registration, client ID, authorization code, personal access token, or organization-owner app approval is required. Sign in at [github.com](https://github.com), open the sidebar, and refresh.
 
-## Why
+It can read the repositories your GitHub web session can access. Organization SSO still applies: complete SSO on GitHub if prompted, then refresh. Separate Chrome profiles have separate GitHub sessions. GitHub Enterprise Server is not supported.
 
-I work on around 20 pull requests a day, spread across many different repositories. GitHub shows them one repository or one notification at a time, so things slip through. A review request from two weeks ago sinks under newer activity. A PR fails its checks overnight and nobody notices. An approved PR sits unmerged for days.
+## Live Folder
 
-PR Sidebar puts all of it in one list that stays open next to whatever you're working on. Anything waiting on you goes to the top of **Needs your attention**, however old it is, so a request you missed last week is just as visible as one from five minutes ago. Everything else is one click away, and opens in its own tab group instead of scattering across your tabs.
+- One flat, collapsible **Pull Requests** folder with compact rows and review/CI indicators.
+- Tags explain why a PR appears: **Needs your review**, **Opened by you**, **Team review**, **Assigned to you**, and more.
+- Right-click the folder, or click **…**, to choose categories and repositories. PRs in several categories appear once.
+- Search and a visible time filter: 24 hours, 3 days, week, 2 weeks, month, 3 months, or **Any time** (default).
+- New PRs get unread dots. Up to three unread/current PRs peek out of a collapsed folder.
+- Click a PR to open it in the **Pull Requests** tab group, reusing an existing tab. Cmd/Ctrl-click or middle-click opens in the background.
+- Right-click a PR to pin it, change read status, copy its link, or open it in a new window. Pinned PRs remain available after leaving their original folder.
+- Custom GitHub search folders, repository grouping, draft hiding, optional attention folder, and optional desktop notifications.
+- Refreshes every two minutes by default. Completed PRs leave open categories on the next refresh; the optional Recently merged category retains merged PRs.
 
-## What it does
+Keyboard: `Alt+Shift+P` opens the sidebar, `/` searches, `↑`/`↓` navigate, `Enter` opens, `p` pins, `u` toggles read, `R` refreshes.
 
-- **Needs your attention:** one folder for everything waiting on you, from any date: review requests, your PRs with changes requested or failing checks, PRs ready to merge, PRs assigned to you, and your other open PRs.
-- **Live folders:** Review requested, Created by me, Assigned to me, Mentioned, Reviewed by me, Recently merged, plus custom folders from any GitHub search (`repo:acme/api is:open`, `team-review-requested:acme/backend`, …).
-- **At a glance:** CI status on every PR, review labels, unread dots for new PRs, and an unread count on the toolbar icon.
-- **Its own space:** clicking a PR opens it in a "Pull Requests" tab group, or switches to it if it's already open. The sidebar's accent follows that tab group's colour.
-- **Filters:** a time range (default: last week), quick filters for Review, Changes, Failing and Ready, search, group by repository, hide drafts, and pinned PRs.
-- **Notifications** for new review requests, and for your PRs that get changes requested or start failing checks.
-- Refreshes every 2 minutes by default.
+Chrome supplies the side-panel frame and tab groups. Arc's browser-wide Spaces and native tab management are not available to a Chrome side-panel extension.
 
-Keyboard: `Alt+Shift+P` opens the sidebar, `/` searches, `↑`/`↓` move, `Enter` opens, `p` pins, `u` toggles read, `R` refreshes.
+## Install
 
-### Settings
+1. Download and unzip a release, or clone the repository.
+2. Open `chrome://extensions`, enable **Developer mode**, choose **Load unpacked**, and select the extension folder.
+3. Sign in to GitHub in that Chrome profile, pin PR Sidebar, and click its icon.
 
-Choose your folders, add custom ones from any GitHub search, and set the refresh interval, tab group colour and notifications.
+Chrome 116 or later is required. After updating the code, click **Reload** on the extension card and reopen the panel.
 
-<img src="docs/screenshots/settings.png" width="660" alt="The PR Sidebar settings page: signed-in account, toggles for each folder including Needs your attention, and custom folders.">
+Upgrading from the OAuth version removes the locally stored token, resets account-specific cached data, and keeps folder queries and other preferences. The Live Folder starts with all dates and the optional attention folder disabled. Old OAuth grants on GitHub are not revoked automatically; they are no longer used by the extension.
 
-## Install (unpacked)
+## How it works
 
-1. Download `pr-sidebar-v<version>.zip` from the latest [release](../../releases/latest) and unzip it, or clone this repo.
-2. Open `chrome://extensions`, turn on **Developer mode**, click **Load unpacked** and choose the unzipped folder.
-3. Pin PR Sidebar, click its icon, and click **Sign in with GitHub**. Or paste a personal access token in Settings (classic token with the `repo` and `read:org` scopes).
+The extension sends read-only, credentialed GET requests to GitHub's own pull-request dashboard. Chrome attaches the existing session; the extension never reads, copies, or stores cookies. An offscreen document parses inert HTML. GitHub's deferred dashboard response provides review and CI status.
 
-After changing `manifest.json`, click the reload icon on the extension's card. Changes to the sidebar's HTML, CSS or JS show up the next time you open the panel.
+These web routes are not a stable public API. A GitHub page change can require a parser update. Unexpected HTML and failed searches produce an error rather than an empty list. Missing status data produces a warning rather than a guessed status. A folder loads at most five pages per refresh, with a warning when it is truncated. Refine the query when necessary.
 
-### Organization PRs missing?
+Account changes and sign-out clear cached PRs, pins, and unread state on the next successful session check. A network error retains the last successful snapshot and displays an error. SSO prompts are shown separately.
 
-If your org restricts third-party apps, its PRs are hidden until an owner approves PR Sidebar. The sidebar shows a banner with a link to request access. A personal access token works without that approval.
+## Develop and build
 
-## Builds and releases
+```sh
+npm ci --ignore-scripts
+npm test
+./scripts/pack.sh
+```
 
-Every push to `main` runs [Pack extension](.github/workflows/pack.yml). It syntax-checks the scripts, verifies that every file the manifest and pages reference exists, and zips only what Chrome needs into `pr-sidebar-v<version>.zip` (attached to the run).
+The package is written to `dist/pr-sidebar-v<version>.zip`. The GitHub Actions workflow installs test dependencies, runs tests, syntax-checks scripts, validates file references, and builds the zip. A push to main with a new manifest version creates a release.
 
-To publish a release, bump `version` in `manifest.json` and push. The workflow creates a GitHub Release `v<version>` with the zip attached; that zip is also what you upload to the Chrome Web Store. Pushes that don't change the version only produce the run artifact.
-
-Build the same zip locally with `./scripts/pack.sh` (output in `dist/`).
-
-## Project layout
-
-| Path | What it is |
+| File | Purpose |
 | --- | --- |
-| `manifest.json` | Extension manifest (MV3) |
-| `background.js` | Background refresh, toolbar badge, notifications |
-| `github.js` | GitHub API, sign-in (OAuth device flow), folders, attention ranking |
-| `sidepanel.*` | The sidebar UI |
-| `options.*` | Settings page |
-| `icons/` | Toolbar icons; `icon.svg` (48px and up) and `icon-small.svg` (16 and 32px) are the sources |
-| `design/` | Store tile, one-colour marks, GitHub app logo |
-| `docs/screenshots/` | README screenshots (sample data) |
-| `STORE_LISTING.md` | Chrome Web Store copy and permission justifications |
-| `scripts/pack.sh`, `.github/workflows/pack.yml` | Packaging and releases |
+| `github-session.js` | Credentialed dashboard requests, pagination, status enrichment |
+| `github-page.js`, `offscreen.*` | Inert page parsing and validation |
+| `github.js` | Settings migration, session isolation, syncing, pins and unread state |
+| `background.js` | Alarms, toolbar badge and notifications |
+| `sidebar-model.js`, `sidepanel.*` | Flat Live Folder and controls |
+| `options.*` | Account status, categories, custom searches and behavior |
+| `tests/` | Synthetic parser, transport, account-switch and list tests |
 
 ## Privacy
 
-PR Sidebar talks only to GitHub. Your token and PR data stay in your browser's extension storage.
+Requests go only to GitHub; avatars are loaded from GitHub's avatar service. PR data and preferences stay in local extension storage. No analytics or external backend is used. No OAuth credential or session cookie is stored by the extension.

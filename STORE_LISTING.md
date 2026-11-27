@@ -3,61 +3,47 @@
 ## Name
 PR Sidebar: GitHub Pull Requests
 
-## Short description (manifest, max 132 characters)
+## Short description
 Arc-style live folders for your GitHub pull requests in Chrome's side panel. Reviews, CI status and unread dots at a glance.
-
-## Category
-Developer Tools
 
 ## Detailed description
 
-Keep every pull request you care about one click away, without living in GitHub notifications.
+Your GitHub pull requests, in a live folder beside your work.
 
-PR Sidebar adds a pull request space to Chrome's side panel, inspired by Arc's live folders. Your review requests, your own PRs and anything assigned to you stay in tidy folders that refresh on their own, so you always know what needs you next.
+PR Sidebar uses the GitHub session already signed into your Chrome profile. No OAuth app, personal access token, or organization-owner app approval is required. Your normal GitHub repository access and organization SSO still apply.
 
-**See what needs you at a glance**
-• A Needs your attention folder with every PR waiting on you, from any date: review requests, changes requested, failing checks, ready to merge, assigned to you and your other open PRs
-• Live folders: Review requested, Created by me, Assigned to me, Mentioned, Reviewed by me and Recently merged
-• Quick filters for Review, Changes, Failing and Ready, with live counts
-• CI status on every PR (passing, failing, running), plus Approved, Changes requested, Draft and Merged labels
-• Blue unread dots for new PRs, and an unread count on the toolbar icon
+• A compact, collapsible Pull Requests folder inspired by Arc
+• Labels for Needs your review, Opened by you, Team review, Assigned to you, and more
+• Repository and category filters in the folder's context menu
+• Visible time range and text search
+• Review decisions and CI status when GitHub provides them
+• Unread dots and a peek at new/current PRs while the folder is collapsed
+• Pinned PRs, custom search folders, repository grouping and draft hiding
+• Optional attention folder and desktop notifications
+• PRs open in a dedicated tab group, reusing existing tabs
+• Automatic refresh every two minutes by default
 
-**Work the way you want**
-• Time filter: last 24 hours, 3 days, week (default), 2 weeks, month, 3 months or any time
-• Custom folders from any GitHub search, like `repo:acme/api is:open` or `team-review-requested:acme/backend`
-• Pin important PRs to the top
-• Group by repository, hide drafts, and search instantly (press `/`)
-• Desktop notifications when a new review request lands, or your PR gets changes requested or starts failing checks
+Your PR data and preferences remain in this browser. The extension reads GitHub's web dashboard and never reads or stores session cookies. No tracking, analytics, or external backend.
 
-**A real space for PRs**
-Clicking a PR opens it in a "Pull Requests" tab group, so your reviews stay together and away from the rest of your tabs. If the PR is already open, PR Sidebar switches to that tab instead of opening a duplicate.
+GitHub's web page format may change. The extension shows errors or warnings when data cannot be refreshed. Searches are limited to five pages per folder per refresh and show a warning when additional results exist. GitHub Enterprise Server is not supported.
 
-**Sign in your way**
-Sign in with GitHub in a few clicks, or paste a personal access token. If your organization hasn't approved the app yet, PR Sidebar tells you which org is blocked and how to request access.
+Keyboard: Alt+Shift+P opens the sidebar, / searches, R refreshes.
 
-**Private by design**
-PR Sidebar talks only to GitHub. Your token and PR data stay in your browser. Nothing is sent to any other server, and there's no tracking or analytics.
+## Permission justifications
+- **sidePanel**: displays pull requests in Chrome's side panel.
+- **storage**: saves preferences, cached PRs, pins, and read state locally.
+- **alarms**: refreshes pull requests periodically.
+- **tabs**: opens PRs, reuses existing tabs, and identifies the current PR.
+- **tabGroups**: groups opened PRs in a Pull Requests tab group.
+- **notifications**: optional alerts when PRs need attention.
+- **offscreen**: parses fetched GitHub HTML with DOMParser in an inert document; does not run remote scripts.
+- **Host access to github.com**: reads the pull-request web dashboard using the existing browser session. No cookie API permission or OAuth application is used.
 
-Keyboard: `Alt+Shift+P` opens the sidebar, `/` searches, `R` refreshes.
-
-## Permission justifications (for the review form)
-- **sidePanel**: shows the pull request list in Chrome's side panel.
-- **storage**: saves your settings, sign-in token, pinned PRs and read/unread state locally.
-- **alarms**: refreshes your pull requests in the background every few minutes.
-- **tabs**: opens PRs, switches to a PR that's already open, and highlights the PR you're viewing.
-- **tabGroups**: keeps opened PRs together in a "Pull Requests" tab group.
-- **notifications**: optional alerts when a new PR needs your review.
-- **Host access to api.github.com**: reads your pull requests from GitHub's API.
-- **Host access to github.com**: completes "Sign in with GitHub" (OAuth device flow).
-
-## Single purpose statement
+## Single purpose
 Shows the user's GitHub pull requests in Chrome's side panel and opens them in a dedicated tab group.
 
 ## Assets
-- Icon: `icons/icon128.png` (Rail mark). Sources: `icons/icon.svg` (48px and up), `icons/icon-small.svg` (16 and 32px)
-- Small promo tile, 440×280: `design/store/promo-tile-440x280.png`
-- One-colour marks: `design/mark-black.svg`, `design/mark-white.svg`
-
-Still needed:
-- Screenshots, 1280×800 (light and dark sidebar next to a GitHub PR page)
-- A privacy policy URL (required because the extension handles an auth token)
+- Icons: `icons/`
+- Existing promotional assets: `design/store/`
+- Existing `docs/screenshots/` images predate the browser-session layout and must be replaced before store publication.
+- A public privacy policy URL is still needed before store submission.

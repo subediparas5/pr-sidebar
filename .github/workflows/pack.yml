@@ -22,6 +22,8 @@ jobs:
         with:
           node-version: 20
 
+      - run: npm ci --ignore-scripts
+
       - name: Check and zip
         id: pack
         run: ./scripts/pack.sh | tee -a "$GITHUB_OUTPUT"

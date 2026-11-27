@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "PR Sidebar",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Arc-style live folders for your GitHub pull requests in Chrome's side panel. Reviews, CI status and unread dots at a glance.",
   "permissions": [
     "sidePanel",
@@ -9,10 +9,10 @@
     "alarms",
     "tabs",
     "tabGroups",
-    "notifications"
+    "notifications",
+    "offscreen"
   ],
   "host_permissions": [
-    "https://api.github.com/*",
     "https://github.com/*"
   ],
   "background": {
@@ -45,5 +45,6 @@
     "32": "icons/icon32.png",
     "48": "icons/icon48.png",
     "128": "icons/icon128.png"
-  }
+  },
+  "minimum_chrome_version": "116"
 }
