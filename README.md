@@ -1,6 +1,12 @@
+<img src="icons/icon128.png" width="64" height="64" alt="PR Sidebar icon" />
+
 # PR Sidebar
 
 GitHub pull requests in Arc-style live folders, inside Chrome's side panel.
+
+![PR Sidebar in light and dark themes, showing review requests, created PRs, assigned PRs, status filters, and the cached time filter.](docs/screenshots/sidebar.jpg)
+
+*Sample data: real projects with fictional pull requests and authors.*
 
 ## Sign in once, on GitHub
 
