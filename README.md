@@ -4,7 +4,7 @@
 
 GitHub pull requests in Arc-style live folders, inside Chrome's side panel.
 
-![PR Sidebar in light and dark themes, showing review requests, created PRs, assigned PRs, status filters, and the cached time filter.](docs/screenshots/sidebar.jpg)
+<img src="docs/screenshots/sidebar.png" width="816" alt="PR Sidebar in light and dark themes, showing review requests, created PRs, assigned PRs, status filters, and the cached time filter." />
 
 *Sample data: real projects with fictional pull requests and authors.*
 
@@ -30,6 +30,14 @@ It can read the repositories your GitHub web session can access. Organization SS
 Keyboard: `Command+Shift+P` on macOS or `Ctrl+Shift+P` on Windows/Linux opens the sidebar, `/` searches, `↑`/`↓` navigate, `Enter` opens, `p` pins, `u` toggles read, `R` refreshes.
 
 Chrome supplies the side-panel frame and tab groups. Arc's browser-wide Spaces and native tab management are not available to a Chrome side-panel extension.
+
+## Settings
+
+Choose your folders, add custom GitHub searches, and set the refresh interval, tab group color, and desktop notifications.
+
+<img src="docs/screenshots/settings.png" width="720" alt="PR Sidebar settings showing the GitHub browser session, folder toggles, custom folders, and refresh and notification preferences." />
+
+*Sample account and preferences.*
 
 ## Install
 
