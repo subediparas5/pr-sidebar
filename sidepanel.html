@@ -7,32 +7,59 @@
   <link rel="stylesheet" href="sidepanel.css" />
 </head>
 <body>
-  <div id="error" class="banner error" role="alert" hidden></div>
-  <div id="orgs" class="banner" hidden></div>
-  <div id="warning" class="banner" role="status" hidden></div>
+  <header>
+    <div class="who">
+      <button id="account" class="avatar-wrap icon-btn" title="Open GitHub" aria-label="Open GitHub"><img id="avatar" alt="" hidden /><span class="app-glyph" id="app-glyph">
+        <svg viewBox="0 0 16 16"><path d="M4.5 5.5v5"/><circle cx="4.5" cy="4.5" r="1.9" fill="currentColor" stroke="none"/><circle cx="4.5" cy="11.5" r="1.2"/><path d="M8.5 4.5h4.5" stroke-width="2.2"/><path d="M8.5 11.5h3" stroke-width="2.2" stroke-opacity=".45"/></svg>
+      </span></button>
+      <div class="who-text">
+        <div class="space-title">Pull Requests</div>
+        <div id="status" class="subtitle"></div>
+      </div>
+    </div>
+    <div class="actions">
+      <button id="refresh" class="icon-btn" title="Refresh (R)" aria-label="Refresh">
+        <svg viewBox="0 0 16 16"><path d="M13.5 8a5.5 5.5 0 1 1-1.6-3.9M13.5 2.5v3h-3" /></svg>
+      </button>
+      <button id="settings" class="icon-btn" title="Settings" aria-label="Settings">
+        <svg viewBox="0 0 24 24"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <div id="error" class="banner banner-error" role="alert" hidden></div>
+  <div id="orgs" class="banner banner-warn" hidden></div>
+  <div id="warning" class="banner banner-warn" role="status" hidden></div>
+  <div id="app">
+    <div class="toolbar">
+      <label class="search">
+        <svg viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.5"/><path d="m10.5 10.5 3 3"/></svg>
+        <input id="filter" type="search" placeholder="Search" aria-label="Search pull requests" />
+        <kbd>/</kbd>
+      </label>
+      <label class="range" title="Only show PRs updated in this period">
+        <svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="5.5"/><path d="M8 5v3l2 1.5"/></svg>
+        <select id="range" aria-label="Updated within"></select>
+      </label>
+      <button id="view" class="icon-btn" title="View options" aria-label="View options">
+        <svg viewBox="0 0 16 16"><path d="M2.5 4.5h11M4.5 8h7M6.5 11.5h3" /></svg>
+      </button>
+    </div>
+
+    <div id="stats" role="group" aria-label="Quick filters"></div>
+    <main id="folders"></main>
+  </div>
+
   <div id="empty" hidden>
     <div class="hero">
-      <span class="hero-icon" aria-hidden="true">⌘</span>
+      <div class="hero-rail" aria-hidden="true"><span class="on">Review requested</span><span>Created by me</span><span>Assigned to me</span></div>
       <h1>Your pull requests, live.</h1>
-      <p>Sign in to GitHub in this Chrome profile. Your pull requests will appear here automatically.</p>
-      <button id="signin" class="primary">Open GitHub</button>
-      <button id="retry" class="text-button">Already signed in? Refresh</button>
+      <p class="lede">Sign in to GitHub in this Chrome profile. Your pull requests will appear here automatically.</p>
+      <button id="signin" class="btn-primary">Open GitHub</button>
+      <button id="retry" class="link-muted">Already signed in? Refresh</button>
     </div>
   </div>
-  <div id="app">
-    <div id="toolbar">
-      <input id="filter" type="search" placeholder="Search pull requests…" aria-label="Search pull requests" />
-      <select id="range" aria-label="Updated within"></select>
-      <button id="close-search" class="icon-btn" aria-label="Clear search" title="Clear search">×</button>
-    </div>
-    <main id="folders" aria-label="GitHub live folders"></main>
-  </div>
-  <footer>
-    <button id="account" class="account" title="Open GitHub"><img id="avatar" alt="" hidden /><span id="status">Connecting to GitHub…</span></button>
-    <button id="search" class="icon-btn" title="Search (/)" aria-label="Search"><svg viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.5"/><path d="m10.5 10.5 3 3"/></svg></button>
-    <button id="refresh" class="icon-btn" title="Refresh (R)" aria-label="Refresh"><svg viewBox="0 0 16 16"><path d="M13.5 8a5.5 5.5 0 1 1-1.6-3.9M13.5 2.5v3h-3"/></svg></button>
-    <button id="settings" class="icon-btn" title="Settings" aria-label="Settings"><svg viewBox="0 0 16 16"><path d="M3 4h10M3 8h10M3 12h10"/><circle cx="6" cy="4" r="1.5"/><circle cx="10" cy="8" r="1.5"/><circle cx="6" cy="12" r="1.5"/></svg></button>
-  </footer>
+
   <div id="menu" role="menu" hidden></div>
   <script type="module" src="sidepanel.js"></script>
 </body>

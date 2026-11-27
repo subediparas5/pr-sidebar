@@ -20,7 +20,6 @@ export const DEFAULT_SETTINGS = {
   sections: { review: true, team: true, created: true, assigned: false, mentioned: false, reviewed: false, merged: false },
   customFolders: [], // [{ id, title, query }] using GitHub search syntax, e.g. "repo:acme/api is:open"
   timeRangeDays: 0,
-  showAttention: false,
   notify: true,
   intervalMinutes: 2,
   groupName: 'Pull Requests',
@@ -33,59 +32,48 @@ export async function getSettings() {
   if (!settings?.intervalChosen) merged.intervalMinutes = DEFAULT_SETTINGS.intervalMinutes;
   delete merged.token;
   delete merged.authMethod;
+  delete merged.showAttention;
+  delete merged.folderLayoutVersion;
   if (!settings?.sessionVersion) {
     merged.timeRangeDays = 0;
-    merged.showAttention = false;
   }
   merged.sessionVersion = 1;
   return merged;
 }
 
-// "Needs your attention": open PRs that need an action from you, regardless of the time filter.
-// Each PR appears once, under its most urgent reason.
+// Status filters count each open PR once, under its most urgent reason.
 export const ATTENTION_REASONS = {
   review:   { label: 'Review requested', short: 'Review' },
   changes:  { label: 'Changes requested', short: 'Changes' },
   failing:  { label: 'Checks failing', short: 'Failing' },
-  ready:    { label: 'Approved', short: 'Approved' },
+  ready:    { label: 'Ready to merge', short: 'Ready' },
   assigned: { label: 'Assigned to you', short: 'Assigned' },
   open:     { label: 'Open', short: 'Open' },
 };
 const ATTENTION_ORDER = Object.keys(ATTENTION_REASONS);
 
-export function attentionFolders(login) {
-  const base = 'is:open is:pr archived:false';
-  return [
-    { key: 'att:review', query: `${base} review-requested:${login} sort:updated-desc` },
-    { key: 'att:mine', query: `${base} author:${login} sort:updated-desc` },
-    { key: 'att:assigned', query: `${base} assignee:${login} sort:updated-desc` },
-  ];
-}
-
-export function rankAttention(raw, login) {
+export function rankStatuses(sections) {
   const out = new Map();
   const add = (p, reason) => {
+    if (p.state !== 'OPEN') return;
     const cur = out.get(p.id);
     if (!cur || ATTENTION_ORDER.indexOf(reason) < ATTENTION_ORDER.indexOf(cur.reason)) out.set(p.id, { ...p, reason });
   };
-  (raw['att:review'] || []).forEach((p) => add(p, 'review'));
-  for (const p of raw['att:mine'] || []) {
+  [...(sections.review || []), ...(sections.team || [])].forEach(p => add(p, 'review'));
+  for (const p of Object.values(sections).flat()) {
     const failing = p.ci === 'FAILURE' || p.ci === 'ERROR';
     if (p.reviewDecision === 'CHANGES_REQUESTED') add(p, 'changes');
     else if (failing) add(p, 'failing');
     else if (p.reviewDecision === 'APPROVED' && !p.isDraft && p.ci !== 'PENDING' && p.ci !== 'EXPECTED') add(p, 'ready');
     else add(p, 'open');
   }
-  (raw['att:assigned'] || []).forEach((p) => add(p, p.author === login ? 'open' : 'assigned'));
   return [...out.values()].sort((a, b) =>
     ATTENTION_ORDER.indexOf(a.reason) - ATTENTION_ORDER.indexOf(b.reason) || b.updatedAt.localeCompare(a.updatedAt));
 }
 
-// Turns the settings into the list of folders to fetch, with the time filter applied.
+// Fill an all-date cache; the sidebar applies its selected time range locally.
 export function buildFolders(settings, login) {
-  const days = Number(settings.timeRangeDays) || 0;
-  const since = days ? new Date(Date.now() - days * 864e5).toISOString().slice(0, 10) : null;
-  const finish = (q) => `${q}${since ? ` updated:>=${since}` : ''} sort:updated-desc`;
+  const finish = (q) => `${q} sort:updated-desc`;
   const builtIn = Object.keys(SECTIONS)
     .filter((k) => settings.sections[k])
     .map((k) => ({ key: k, title: SECTIONS[k].title, query: finish(SECTIONS[k].query(login)) }));
@@ -133,18 +121,26 @@ async function runSync(client) {
     }
     const folders = buildFolders(settings, viewer.login);
     const keys = folders.map(f => f.key);
-    const all = await client.folders([...folders, ...(settings.showAttention ? attentionFolders(viewer.login) : [])]);
+    const all = await client.folders(folders);
     const sections = Object.fromEntries(keys.map(k => [k, all[k]]));
-    const attention = settings.showAttention ? rankAttention(all, viewer.login) : null;
+    const attention = rankStatuses(sections); // Internal status snapshot for change notifications.
     // Also catch an account switch during the deferred status requests.
     await client.identify();
     const blockedOrgs = client.blockedOrgs;
 
-    const ids = new Set([...Object.values(sections).flat(), ...(attention || [])].map((p) => p.id));
+    const cachedPRs = [...Object.values(sections).flat(), ...(attention || [])];
+    const ids = new Set(cachedPRs.map((p) => p.id));
     let seen = prev.seen || {};
     if (!prev.initialized) {
       // First run: don't flood the sidebar with unread dots.
       seen = Object.fromEntries([...ids].map((id) => [id, true]));
+    } else if (prev.state?.cacheVersion !== 1) {
+      // Expanding an older, date-limited cache must not announce historical PRs
+      // as new. Preserve existing unread rows and updates since the last sync.
+      const before = new Set([...Object.values(prev.state?.sections || {}).flat(), ...(prev.state?.attention || [])].map(p => p.id));
+      for (const p of cachedPRs) {
+        if (!before.has(p.id) && (!prev.state?.lastSync || Date.parse(p.updatedAt) <= prev.state.lastSync)) seen[p.id] = true;
+      }
     }
     // A narrower search doesn't mean a PR is new when it reappears. Retain read
     // history across filters, bounded for long-lived profiles; account changes clear it.
@@ -161,7 +157,7 @@ async function runSync(client) {
       // Your own PRs that just got changes requested or started failing checks.
       const prevReason = new Map((prev.state?.attention || []).map((p) => [p.id, p.reason]));
       for (const p of attention || []) {
-        if ((p.reason === 'changes' || p.reason === 'failing') && prevReason.has(p.id) && prevReason.get(p.id) !== p.reason) {
+        if (p.author === viewer.login && (p.reason === 'changes' || p.reason === 'failing') && prevReason.has(p.id) && prevReason.get(p.id) !== p.reason) {
           fresh.push({ ...p, why: ATTENTION_REASONS[p.reason].label });
         }
       }
@@ -186,6 +182,7 @@ async function runSync(client) {
         timeRangeDays: settings.timeRangeDays,
         blockedOrgs,
         authMethod: 'browser',
+        cacheVersion: 1,
         warnings: client.warnings,
         lastSync: Date.now(),
         error: null,
@@ -240,6 +237,6 @@ export async function markUnread(id) {
 
 export function unreadIds(state, seen) {
   const ids = new Set();
-  [...Object.values(state?.sections || {}).flat(), ...(state?.attention || [])].forEach((p) => { if (!seen?.[p.id]) ids.add(p.id); });
+  Object.values(state?.sections || {}).flat().forEach((p) => { if (!seen?.[p.id]) ids.add(p.id); });
   return ids;
 }

@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "PR Sidebar",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Arc-style live folders for your GitHub pull requests in Chrome's side panel. Reviews, CI status and unread dots at a glance.",
   "permissions": [
     "sidePanel",
@@ -35,7 +35,8 @@
   "commands": {
     "_execute_action": {
       "suggested_key": {
-        "default": "Alt+Shift+P"
+        "default": "Ctrl+Shift+P",
+        "mac": "Command+Shift+P"
       },
       "description": "Open the pull request sidebar"
     }

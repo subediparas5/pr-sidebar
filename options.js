@@ -17,9 +17,7 @@ async function renderAccount() {
   $('color').value = s.groupColor;
   $('notify').checked = s.notify;
   (s.customFolders || []).forEach(addFolderRow);
-  $('sections').innerHTML = `<label class="check"><span class="name">Needs your attention
-      <span class="hint" style="display:block;font-weight:400">Review requests, changes requested, failing checks, approved PRs and your other open PRs, from any date</span></span>
-      <input type="checkbox" id="show-attention" ${s.showAttention ? 'checked' : ''}/></label>` + Object.entries(SECTIONS)
+  $('sections').innerHTML = Object.entries(SECTIONS)
     .map(([k, v]) => `<label class="check"><span class="name">${v.title}</span><input type="checkbox" data-key="${k}" ${s.sections[k] ? 'checked' : ''}/></label>`)
     .join('');
   renderAccount();
@@ -54,7 +52,6 @@ $('save').addEventListener('click', async () => {
       settings: {
         ...prev, sections,
         notify: $('notify').checked,
-        showAttention: $('show-attention').checked,
         customFolders: [...document.querySelectorAll('.cf')]
           .map((r) => ({ id: r.dataset.id, title: r.querySelector('.t').value.trim(), query: r.querySelector('.q').value.trim() }))
           .filter((f) => f.query),
